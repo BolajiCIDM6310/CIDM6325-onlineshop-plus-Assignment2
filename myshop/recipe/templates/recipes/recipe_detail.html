@@ -1,0 +1,103 @@
+{% extends "./base.html" %}
+{% load static %}
+{% load blog_tags %}
+{% load i18n static %}
+
+{% block title %}{{ recipe.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ recipe.title }}</h1>
+<!-- {% if recipe.photo %} -->
+<img src="{{ recipe.photo.url }}" alt="{{ recipe.title }}" height="20%" width="35%">
+<!-- {% endif %} -->
+<br>
+<!-- BookMarking -->
+{% if user.is_authenticated %}
+{% if is_bookmarked %}
+<form
+    action="{% url 'recipe:remove_bookmark_rec' recipe.publish.year recipe.publish.month recipe.publish.day recipe.slug %}"
+    method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Remove Bookmark</button>
+</form>
+{% else %}
+<form
+    action="{% url 'recipe:add_bookmark_rec' recipe.publish.year recipe.publish.month recipe.publish.day recipe.slug %}"
+    method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Add Bookmark</button>
+</form>
+{% endif %}
+{% else %}
+<p><a href="{% url 'login' %}">Log in</a> to bookmark this post.</p>
+{% endif %}
+<!-- end bookmark   -->
+
+<h4>${{ recipe.price}}</h4>
+<p class="date">
+    Published {{ recipe.publish }} by {{ recipe.author }}
+</p>
+
+{% if not has_subscription and not has_recipe_book%}
+<p>This content is available for subscribed members or recipe book owners only.</p>
+<a href="{% url 'recipe:purchase_subscription' recipe.id %}">Subscribe</a> or
+<a href="{% url 'recipe:purchase_recipe_book' recipe.id %}">Buy Recipe Book</a> to access exclusive content.
+
+{% else %}
+<h2>Exclusive Content</h2>
+<p>{{ recipe.exclusive_content }}</p>
+
+
+</form>
+{% endif %}
+
+{{ recipe.steps|linebreaks }}
+
+<p><b>INGREDIENTS</b></p>
+{{ recipe.ingredients|markdown }}
+
+<form action="{% url 'cart:cart_add_rec' recipe.id %}" method="post">
+    {{ cart_recipe_form }}
+    {% csrf_token %}
+    <input type="submit" value="{% translate 'Purchase book' %}">
+</form>
+
+<p>
+    <a href="{% url 'recipe:recipe_share' recipe.id %}">Share this post</a>
+</p>
+
+<h2>Similar posts</h2>
+{% for recipe in similar_recipes %}
+<p>
+    <a href="{{ recipe.get_absolute_url }}">{{ recipe.title }}</a>
+</p>
+{% empty %}
+There are no similar posts yet.
+{% endfor %}
+
+<h3>Ratings</h3>
+{% if ratings %}
+{% for rating in ratings %}
+<p>{{ rating.user }}: {{ rating.rating }}/5</p>
+{% endfor %}
+{% else %}
+<p> No ratings found</p>
+{% endif %}
+
+{% with comments.count as total_comments %}
+<h2>{{ total_comments }} comment{{ total_comments|pluralize }}</h2>
+{% endwith %}
+
+{% for comment in comments %}
+<div class="comment">
+    <p class="info">
+        Comment {{ forloop.counter }} by {{ comment.name }} on {{ comment.created }}
+    </p>
+    {{ comment.body|linebreaks }}
+</div>
+{% empty %}
+<p>There are no comments yet.</p>
+{% endfor %}
+
+{% include "recipes/includes/comment_form.html" %}
+{% endblock %}

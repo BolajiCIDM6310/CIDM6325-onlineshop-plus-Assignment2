@@ -1,0 +1,24 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Your Bookmarks{% endblock %}
+
+{% block content %}
+<h1>Your Bookmarked Posts</h1>
+
+{% if bookmarks %}
+<ul>
+    {% for bookmark in bookmarks %}
+    <li>
+        <!-- <a href="{{ post.get_absolute_url }}">{ -->
+        <a
+            href="{% url 'blog:post_detail' bookmark.post.publish.year bookmark.post.publish.month bookmark.post.publish.day bookmark.post.slug %}">
+            {{ bookmark.post.title }}</a>
+        <p>Bookmarked on: {{ bookmark.created_at|date:"F d, Y" }}</p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have no bookmarks yet.</p>
+{% endif %}
+
+{% endblock %}

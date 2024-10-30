@@ -1,0 +1,23 @@
+{% extends "./base.html" %}
+
+{% block title %}Your Bookmarks{% endblock %}
+
+{% block content %}
+<h1>Your Bookmarked Recipes</h1>
+
+{% if bookmarks %}
+<ul>
+    {% for bookmark in bookmarks %}
+    <li>
+        <a
+            href="{% url 'recipe:recipe_detail' bookmark.recipe.publish.year bookmark.recipe.publish.month bookmark.recipe.publish.day bookmark.recipe.slug %}">
+            {{ bookmark.recipe.title }}</a>
+        <p>Bookmarked on: {{ bookmark.created_at|date:"F d, Y" }}</p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You have no bookmarks yet.</p>
+{% endif %}
+
+{% endblock %}
